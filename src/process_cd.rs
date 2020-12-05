@@ -42,9 +42,12 @@ pub fn init(elapsed: u32, mut cd_state: &mut CDState, id: u32, data: &[u8]) {
             if id == 0x102 && (data[5] & 0x8) == 0 {
                 cd_state.latch_enabled = true;
             }
+            if id == 0x102 && (data[3] > 0) {
+                cd_state.start_charge = true;
+                cd_state.charge_state = ChargeStateEnum::ChargeLoop;
+            }
         }
-        ChargeStateEnum::ContactorRequest => {}
-        ChargeStateEnum::ContactorFixed => {}
+        ChargeStateEnum::ChargeLoop => {}
         ChargeStateEnum::StopCharge => {
             cd_state.charge_state = ChargeStateEnum::ChargeIdle;
             cd_state.charger_relay_enabled = false;

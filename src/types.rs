@@ -18,8 +18,7 @@ impl Display for ChargeStateEnum {
             ChargeStateEnum::InitiateCharge => write!(f, "Initiate Charge"),
             ChargeStateEnum::WaitForComms => write!(f, "Wait Comms"),
             ChargeStateEnum::WaitChargeEnable => write!(f, "Wait for Vehicle Enable"),
-            ChargeStateEnum::ContactorRequest => write!(f, "Contactor Request"),
-            ChargeStateEnum::ContactorFixed => write!(f, "Charge Enabled"),
+            ChargeStateEnum::ChargeLoop => write!(f, "Charge Loop"),
             ChargeStateEnum::StopCharge => write!(f, "Stop Charge"),
         }
     }
@@ -32,8 +31,7 @@ pub enum ChargeStateEnum {
     InitiateCharge,
     WaitForComms,
     WaitChargeEnable,
-    ContactorRequest,
-    ContactorFixed,
+    ChargeLoop,
     StopCharge,
 }
 
