@@ -1,0 +1,14 @@
+[alias]
+bf4 = "build --features=nucleof446re  --bin can-dc-fc-f4"
+bf7 = "build --features=nucleof767zi  --bin can-dc-fc-f7"
+rf4 = "run --features=nucleof446re  --bin can-dc-fc-f4"
+rf7 = "run --features=nucleof767zi  --bin can-dc-fc-f7"
+
+[target.thumbv7em-none-eabihf]
+runner = "gdb-multiarch -q -x openocd.gdb"
+rustflags = [
+  "-C", "link-arg=-Tlink.x",
+]
+
+[build]
+target="thumbv7em-none-eabihf"

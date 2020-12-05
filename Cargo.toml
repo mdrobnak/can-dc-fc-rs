@@ -1,0 +1,42 @@
+[package]
+name = "can-dc-fc"
+version = "0.1.0"
+authors = ["Matthew Drobnak <matthew@drobnak.com>"]
+edition = "2018"
+
+[[bin]]
+name = "can-dc-fc-f7"
+path = "src/main.rs"
+required-features = ["nucleof767zi"]
+
+[[bin]]
+name = "can-dc-fc-f4"
+path = "src/main.rs"
+required-features = ["nucleof446re"]
+
+[features]
+nucleof446re = ["stm32f4xx-hal","stm32f4xx-hal/stm32f446"]
+nucleof767zi = ["stm32f7xx-hal","stm32f7xx-hal/stm32f767"]
+
+[dependencies]
+arraydeque = { version = "0.4.5", default-features = false }
+cortex-m = "0.6.2"
+cortex-m-rt = "0.6.12"
+panic-halt = "0.2.0"
+ufmt = "0.1.0"
+
+[dependencies.heapless]
+version  = "0.5.6"
+features = ["ufmt-impl"]
+
+[dependencies.stm32f7xx-hal]
+optional = true
+path = "/home/mdrobnak/vcs/git/mdrobnak-stm32f7xx-hal"
+features = ["rt"]
+
+[dependencies.stm32f4xx-hal]
+optional = true
+git = "https://github.com/mdrobnak/stm32f4xx-hal.git"
+features = ["rt"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
