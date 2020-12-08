@@ -14,10 +14,7 @@ pub fn init(elapsed: u32, mut cd_state: &mut CDState, id: u32, data: &[u8]) {
             // Nothing to see here.
         }
         ChargeStateEnum::InitiateCharge => {
-            // Turn on Relay to power EV side.
-            cd_state.charger_relay_enabled = true;
-            cd_state.charge_state = ChargeStateEnum::WaitForComms;
-            add_to_activity_list!(cd_state, "{} - InitiateCharge -> WaitForComms", elapsed);
+            // Nothing to see here as nothing coming in yet.
         }
         ChargeStateEnum::WaitForComms => {
             // Wait for 100,101,102 from EV
@@ -48,12 +45,7 @@ pub fn init(elapsed: u32, mut cd_state: &mut CDState, id: u32, data: &[u8]) {
             }
         }
         ChargeStateEnum::ChargeLoop => {}
-        ChargeStateEnum::StopCharge => {
-            cd_state.charge_state = ChargeStateEnum::ChargeIdle;
-            cd_state.charger_relay_enabled = false;
-            cd_state.latch_enabled = false;
-            add_to_activity_list!(cd_state, "{} - StopCharge -> ChargeIdle", elapsed);
-        }
+        ChargeStateEnum::StopCharge => {}
         ChargeStateEnum::TimeOut => {}
     }
 }

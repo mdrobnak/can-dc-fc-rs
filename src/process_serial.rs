@@ -17,14 +17,21 @@ pub fn normal_input(command: u8, elapsed: u32, mut cd_state: &mut CDState) {
         0x41 => {}
         // c
         0x63 => {
-            cd_state.charger_relay_enabled = true;
             add_to_activity_list!(cd_state, "{} - User initied start of charge.", elapsed);
+            // Turn on Relay to power EV side.
+            cd_state.charger_relay_enabled = true;
+            cd_state.charge_state = ChargeStateEnum::WaitForComms;
+            add_to_activity_list!(cd_state, "{} - InitiateCharge -> WaitForComms", elapsed);
         }
         // C
         0x43 => {
-            cd_state.charger_relay_enabled = false;
             cd_state.charge_state = ChargeStateEnum::StopCharge;
             add_to_activity_list!(cd_state, "{} - User initied stop of charge.", elapsed);
+            cd_state.charge_state = ChargeStateEnum::ChargeIdle;
+            cd_state.charger_relay_enabled = false;
+            cd_state.latch_enabled = false;
+            cd_state.enable_can_transmit = false;
+            add_to_activity_list!(cd_state, "{} - StopCharge -> ChargeIdle", elapsed);
         }
         // d
         0x64 => {}

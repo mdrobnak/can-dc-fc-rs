@@ -2,8 +2,10 @@
 use crate::types::*;
 
 pub fn init(mut hundred_ms_counter: u8, cd_state: &mut CDState, fc_can: &FCCAN) -> u8 {
-    params108(fc_can);
-    status109(fc_can, cd_state);
+    if cd_state.enable_can_transmit {
+        params108(fc_can);
+        status109(fc_can, cd_state);
+    }
     if hundred_ms_counter < 255 {
         hundred_ms_counter = hundred_ms_counter + 1;
     } else {

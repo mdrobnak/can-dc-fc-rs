@@ -36,7 +36,7 @@ pub enum ChargeStateEnum {
 }
 
 pub struct CDState {
-    pub activity_list: ArrayDeque<[String<U60>; 4], Wrapping>,
+    pub activity_list: ArrayDeque<[String<U60>; 8], Wrapping>,
     pub charger_relay_enabled: bool,
     pub charge_state: ChargeStateEnum,
     pub comm_timeout: bool,

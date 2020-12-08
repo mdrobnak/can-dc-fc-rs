@@ -18,7 +18,7 @@ pub fn display(
             print_header_to_serial(tx, verbose_console);
         }
 
-        let mut line = 15;
+        let mut line = 10;
         for i in cd_state.activity_list.iter() {
             uprintln!(tx, "\x1B[{};3H{}", line, i);
             line = line + 1;
@@ -76,6 +76,10 @@ pub fn verbose_footer(tx: &mut SerialConsoleOutput) {
     uprintln!(tx, "");
     uprintln!(tx, "                          Activity");
     uprintln!(tx, "+--------------------------------------------------------------+");
+    uprintln!(tx, "|                                                              |");
+    uprintln!(tx, "|                                                              |");
+    uprintln!(tx, "|                                                              |");
+    uprintln!(tx, "|                                                              |");
     uprintln!(tx, "|                                                              |");
     uprintln!(tx, "|                                                              |");
     uprintln!(tx, "|                                                              |");
