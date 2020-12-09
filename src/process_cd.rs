@@ -36,10 +36,22 @@ pub fn init(elapsed: u32, mut cd_state: &mut CDState, id: u32, data: &[u8]) {
             }
         }
         ChargeStateEnum::WaitChargeEnable => {
-            if id == 0x102 && (data[5] & 0x8) == 0 {
-                cd_state.latch_enabled = true;
+            if id == 0x102 && (data[5] & 0x1) == 0 {
+                cd_state.charge_state = ChargeStateEnum::InsulationTest;
             }
-            if id == 0x102 && (data[3] > 0) {
+        }
+        ChargeStateEnum::InsulationTest => {
+            if cd_state.delaycount > 4 {
+                cd_state.charge_state = ChargeStateEnum::WaitVehicleChargeStart;
+                cd_state.delaycount = 0;
+            } else {
+                cd_state.delaycount += 1;
+            }
+        }
+        ChargeStateEnum::WaitVehicleChargeStart => {
+            cd_state.latch_enabled = true;
+            if id == 0x102 && (data[5] & 0x8) == 0 && (data[3] > 0) {
+                // Current > 0, Contactors closed.
                 cd_state.start_charge = true;
                 cd_state.charge_state = ChargeStateEnum::ChargeLoop;
             }

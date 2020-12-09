@@ -18,6 +18,8 @@ impl Display for ChargeStateEnum {
             ChargeStateEnum::InitiateCharge => write!(f, "Initiate Charge"),
             ChargeStateEnum::WaitForComms => write!(f, "Wait Comms"),
             ChargeStateEnum::WaitChargeEnable => write!(f, "Wait for Vehicle Enable"),
+            ChargeStateEnum::InsulationTest => write!(f, "Insulation Test"),
+            ChargeStateEnum::WaitVehicleChargeStart => write!(f, "Wait for Vehicle Charge Start"),
             ChargeStateEnum::ChargeLoop => write!(f, "Charge Loop"),
             ChargeStateEnum::StopCharge => write!(f, "Stop Charge"),
         }
@@ -31,6 +33,8 @@ pub enum ChargeStateEnum {
     InitiateCharge,
     WaitForComms,
     WaitChargeEnable,
+    InsulationTest,
+    WaitVehicleChargeStart,
     ChargeLoop,
     StopCharge,
 }
@@ -40,6 +44,7 @@ pub struct CDState {
     pub charger_relay_enabled: bool,
     pub charge_state: ChargeStateEnum,
     pub comm_timeout: bool,
+    pub delaycount: u8,
     pub enable_can_transmit: bool,
     pub evse_request: bool,
     pub latch_enabled: bool,
@@ -57,6 +62,7 @@ impl CDState {
             activity_list: ArrayDeque::new(),
             charger_relay_enabled: false,
             charge_state: ChargeStateEnum::StopCharge,
+            delaycount: 0,
             enable_can_transmit: false,
             comm_timeout: true,
             evse_request: false,
