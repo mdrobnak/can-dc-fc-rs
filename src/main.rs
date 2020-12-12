@@ -1,4 +1,5 @@
 #![deny(unsafe_code)]
+#![deny(warnings)]
 #![no_main]
 #![no_std]
 
@@ -84,6 +85,7 @@ fn main() -> ! {
 
     // Create the status structure
     let mut cd_state = CDState::new();
+    let mut car_state = CarState::new();
     // Status queue things
     // Too many of these items slows down serial console, which slows down
     // all of the loops.
@@ -99,13 +101,13 @@ fn main() -> ! {
         // CAN reception
         for fifo in &[RxFifo::Fifo0, RxFifo::Fifo1] {
             if let Ok(rx_frame) = fc_can.receive(fifo) {
-                can_receive_logic(&rx_frame, elapsed, &mut cd_state);
+                can_receive_logic(&rx_frame, elapsed, &mut cd_state, &mut car_state);
             }
         }
 
         // Serial input (and some output) - BUT - only gets called when there is input!
         if let Ok(received) = rx.read() {
-            process_serial(received, elapsed, &mut cd_state);
+            process_serial(received, elapsed, &mut cd_state, &mut car_state);
         }
 
         // 10 ms - Done
@@ -117,19 +119,26 @@ fn main() -> ! {
         // 100 ms - Done
         if (elapsed - previous_100_ms_ts) >= HUNDRED_MS {
             previous_100_ms_ts = elapsed;
-            hundred_ms_counter = hundred_ms_loop(hundred_ms_counter, &mut cd_state, &fc_can);
-            if cd_state.charger_relay_enabled {
+            hundred_ms_counter =
+                hundred_ms_loop(hundred_ms_counter, &mut cd_state, &mut car_state, &fc_can);
+            if cd_state.switch_one {
                 relay_1.set_low().ok();
             } else {
                 relay_1.set_high().ok();
             }
-            if cd_state.charger_relay_enabled && cd_state.latch_enabled {
+            if cd_state.switch_one && cd_state.switch_two {
                 relay_2.set_low().ok();
             } else {
                 relay_2.set_high().ok();
             }
 
-            serial_console(&mut tx, &mut cd_state, elapsed, hundred_ms_counter);
+            serial_console(
+                &mut tx,
+                &mut cd_state,
+                &mut car_state,
+                elapsed,
+                hundred_ms_counter,
+            );
 
             // Once run, flip it off.
             if cd_state.quiet_to_verbose {

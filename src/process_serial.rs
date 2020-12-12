@@ -2,14 +2,20 @@
 use crate::add_to_activity_list;
 use crate::types::CDState;
 use crate::types::*;
+use crate::utils::reset_car_data;
 use heapless::consts::U60;
 use heapless::String;
 use ufmt::uwrite;
 
-pub fn init(command: u8, elapsed: u32, mut cd_state: &mut CDState) {
-    normal_input(command, elapsed, &mut cd_state);
+pub fn init(command: u8, elapsed: u32, mut cd_state: &mut CDState, mut car_state: &mut CarState) {
+    normal_input(command, elapsed, &mut cd_state, &mut car_state);
 }
-pub fn normal_input(command: u8, elapsed: u32, mut cd_state: &mut CDState) {
+pub fn normal_input(
+    command: u8,
+    elapsed: u32,
+    mut cd_state: &mut CDState,
+    mut car_state: &mut CarState,
+) {
     match command {
         // a
         0x61 => {}
@@ -19,7 +25,7 @@ pub fn normal_input(command: u8, elapsed: u32, mut cd_state: &mut CDState) {
         0x63 => {
             add_to_activity_list!(cd_state, "{} - User initied start of charge.", elapsed);
             // Turn on Relay to power EV side.
-            cd_state.charger_relay_enabled = true;
+            cd_state.switch_one = true;
             cd_state.charge_state = ChargeStateEnum::WaitForComms;
             add_to_activity_list!(cd_state, "{} - InitiateCharge -> WaitForComms", elapsed);
         }
@@ -28,9 +34,11 @@ pub fn normal_input(command: u8, elapsed: u32, mut cd_state: &mut CDState) {
             cd_state.charge_state = ChargeStateEnum::StopCharge;
             add_to_activity_list!(cd_state, "{} - User initied stop of charge.", elapsed);
             cd_state.charge_state = ChargeStateEnum::ChargeIdle;
-            cd_state.charger_relay_enabled = false;
+            reset_car_data(&mut car_state);
+            cd_state.switch_one = false;
             cd_state.latch_enabled = false;
             cd_state.enable_can_transmit = false;
+            cd_state.current_voltage = 0;
             add_to_activity_list!(cd_state, "{} - StopCharge -> ChargeIdle", elapsed);
         }
         // d

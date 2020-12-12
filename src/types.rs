@@ -41,9 +41,9 @@ pub enum ChargeStateEnum {
 
 pub struct CDState {
     pub activity_list: ArrayDeque<[String<U60>; 8], Wrapping>,
-    pub charger_relay_enabled: bool,
     pub charge_state: ChargeStateEnum,
     pub comm_timeout: bool,
+    pub current_voltage: u16,
     pub delaycount: u8,
     pub enable_can_transmit: bool,
     pub evse_request: bool,
@@ -51,27 +51,81 @@ pub struct CDState {
     pub previous_can_ts: u32,
     pub print_menu_request: bool,
     pub quiet_to_verbose: bool,
+    pub simulate_insulation_test: bool,
     pub start_charge: bool,
+    pub switch_one: bool,
+    pub switch_two: bool,
     pub verbose_stats: bool,
 }
 
 impl CDState {
     pub fn new() -> Self {
-        // we create a method to instantiate `Foo`
         Self {
             activity_list: ArrayDeque::new(),
-            charger_relay_enabled: false,
             charge_state: ChargeStateEnum::StopCharge,
+            comm_timeout: true,
+            current_voltage: 0,
             delaycount: 0,
             enable_can_transmit: false,
-            comm_timeout: true,
             evse_request: false,
             latch_enabled: false,
-            print_menu_request: false,
             previous_can_ts: 0,
+            print_menu_request: false,
             quiet_to_verbose: false,
+            simulate_insulation_test: false,
             start_charge: false,
+            switch_one: false,
+            switch_two: false,
             verbose_stats: false,
+        }
+    }
+}
+
+pub struct CarState {
+    pub battery_over_temperature: bool,
+    pub battery_over_voltage: bool,
+    pub battery_pack_size: f32,
+    pub battery_max_voltage: f32,
+    pub battery_under_voltage: bool,
+    pub charge_stop_request: bool,
+    pub charge_time_estimate: f32,
+    pub charge_time_max: f32,
+    pub charging_enabled: bool,
+    pub charging_malfunction: bool,
+    pub contactor_open: bool,
+    pub current_deviation: bool,
+    pub current_target: u8,
+    pub malfunction: bool,
+    pub not_park: bool,
+    pub stop_before_charge: bool,
+    pub voltage_deviation: bool,
+    pub voltage_target: u16,
+    pub vehicle_parked: bool,
+}
+
+impl CarState {
+    pub fn new() -> Self {
+        Self {
+            battery_over_temperature: false,
+            battery_over_voltage: false,
+            battery_pack_size: 0.0,
+            battery_max_voltage: 0.0,
+            battery_under_voltage: false,
+            charge_stop_request: false,
+            charge_time_estimate: 0.0,
+            charge_time_max: 0.0,
+            charging_enabled: false,
+            charging_malfunction: false,
+            contactor_open: true,
+            current_deviation: false,
+            current_target: 0,
+            malfunction: false,
+            not_park: true,
+            stop_before_charge: false,
+
+            voltage_deviation: false,
+            voltage_target: 0,
+            vehicle_parked: false,
         }
     }
 }

@@ -8,3 +8,4 @@ pub mod process_cd;
 pub mod process_serial;
 pub mod serial_console;
 pub mod types;
+pub mod utils;

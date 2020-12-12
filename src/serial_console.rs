@@ -1,4 +1,4 @@
-//#![deny(warnings)]
+#![deny(warnings)]
 use crate::types::*;
 use crate::{uprint, uprintln};
 use core::fmt::Write;
@@ -6,6 +6,7 @@ use core::fmt::Write;
 pub fn display(
     tx: &mut SerialConsoleOutput,
     cd_state: &mut CDState,
+    car_state: &mut CarState,
     sys_ticks: u32,
     hundred_ms_counter: u8,
 ) {
@@ -27,17 +28,27 @@ pub fn display(
         if hundred_ms_counter % 5 == 0 {
             uprintln!(
                 tx,
-                "\x1B[20HPhase 1: {}\x1B[20;20HPhase 2: {}",
-                cd_state.charger_relay_enabled,
+                "\x1B[21HPhase 1: {}\x1B[21;20HPhase 2: {}",
+                cd_state.switch_one,
                 cd_state.latch_enabled,
+            );
+            uprintln!(
+                tx,
+                "\x1B[23HTgt V: {}, Tgt A: {}, Error: {}, Chg Enbld: {}, Contactors Closed: {}, Pack Size: {}",
+                car_state.voltage_target,
+                car_state.current_target,
+                if car_state.malfunction { "Y" } else { "N" },
+                if car_state.charging_enabled { "Y" } else { "N" },
+                if car_state.contactor_open { "N" } else { "Y" },
+                car_state.battery_pack_size,
             );
         }
         uprint!(
             tx,
-            "\x1B[21HUptime: {}\x1B[21;20HCharge Type: ??",
+            "\x1B[24HUptime: {}\x1B[24;20HState: {}",
             sys_ticks,
+            cd_state.charge_state
         ); // 18 characters
-        uprint!(tx, "\x1B[22HState: {} \x1B[0K", cd_state.charge_state); // State is likely no more than 20 chars.
     } else if hundred_ms_counter % 5 == 0 {
         if print_menu {
             print_header_to_serial(tx, verbose_console);
@@ -48,7 +59,7 @@ pub fn display(
             );
         }
         uprint!(tx, "State: {}  Charging: ", cd_state.charge_state); // State is likely no more than 20 chars.
-        if cd_state.charger_relay_enabled {
+        if cd_state.switch_one {
             uprint!(tx, "Enabled   ");
         } else {
             uprint!(tx, "Disabled  ");
@@ -85,4 +96,8 @@ pub fn verbose_footer(tx: &mut SerialConsoleOutput) {
     uprintln!(tx, "|                                                              |");
     uprintln!(tx, "|                                                              |");
     uprintln!(tx, "+--------------------------------------------------------------+");
+    uprintln!(tx, "");
+    uprintln!(tx, "Charger State:");
+    uprintln!(tx, "");
+    uprintln!(tx, "Car State:");
 }

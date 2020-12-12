@@ -2,7 +2,12 @@
 use crate::process_cd::init as process_cd;
 use crate::types::*;
 
-pub fn init(can_frame: &CanFrame, elapsed: u32, mut cd_state: &mut CDState) {
+pub fn init(
+    can_frame: &CanFrame,
+    elapsed: u32,
+    mut cd_state: &mut CDState,
+    mut car_state: &mut CarState,
+) {
     if let CanFrame::DataFrame(ref frame) = can_frame {
         let id: u32 = frame.id().into();
         let data = frame.data();
@@ -14,7 +19,7 @@ pub fn init(can_frame: &CanFrame, elapsed: u32, mut cd_state: &mut CDState) {
             0x100 | 0x101 | 0x102 => {
                 cd_state.previous_can_ts = elapsed;
                 cd_state.comm_timeout = false;
-                process_cd(elapsed, &mut cd_state, id, data);
+                process_cd(elapsed, &mut cd_state, &mut car_state, id, data);
             }
             _ => {}
         }

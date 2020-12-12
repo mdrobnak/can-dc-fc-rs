@@ -1,4 +1,4 @@
-//#![deny(warnings)]
+#![deny(warnings)]
 #[cfg(feature = "nucleof767zi")]
 extern crate stm32f7xx_hal as hal;
 
