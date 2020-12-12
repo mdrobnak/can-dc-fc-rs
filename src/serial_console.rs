@@ -30,7 +30,7 @@ pub fn display(
                 tx,
                 "\x1B[21HPhase 1: {}\x1B[21;20HPhase 2: {}",
                 cd_state.switch_one,
-                cd_state.latch_enabled,
+                cd_state.switch_two,
             );
             uprintln!(
                 tx,

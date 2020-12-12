@@ -158,6 +158,7 @@ pub fn init(
         ChargeStateEnum::StopCharge => {
             reset_car_data(&mut car_state);
             cd_state.switch_one = false;
+            cd_state.switch_two = false;
             cd_state.latch_enabled = false;
             cd_state.enable_can_transmit = false;
             cd_state.current_voltage = 0;
