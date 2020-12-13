@@ -1,7 +1,7 @@
 #![deny(warnings)]
 use crate::add_to_activity_list;
 use crate::types::*;
-use crate::utils::reset_car_data;
+use crate::utils::stop_charge;
 
 // Logging
 use heapless::consts::U60;
@@ -53,6 +53,8 @@ pub fn init(
     id: u32,
     data: &[u8],
 ) {
+    // Always attempt to update car data.
+    update_car_data(id, &data, &mut car_state);
     // Main state machine for charge state here
     match cd_state.charge_state {
         ChargeStateEnum::ChargeIdle => {
@@ -67,7 +69,6 @@ pub fn init(
                 0x100 | 0x101 | 0x102 => {
                     // Compute max time...ehhh.
                     // Start transmitting 0x108, 0x109
-                    update_car_data(id, &data, &mut car_state);
                     cd_state.enable_can_transmit = true;
                     cd_state.charge_state = ChargeStateEnum::WaitChargeEnable;
                     add_to_activity_list!(
@@ -82,7 +83,6 @@ pub fn init(
             }
         }
         ChargeStateEnum::WaitChargeEnable => {
-            update_car_data(id, &data, &mut car_state);
             if car_state.charging_enabled {
                 add_to_activity_list!(cd_state, "{} - WaitChargeEnable -> InsulationTest", elapsed);
                 cd_state.latch_enabled = true;
@@ -90,7 +90,6 @@ pub fn init(
             }
         }
         ChargeStateEnum::InsulationTest => {
-            update_car_data(id, &data, &mut car_state);
             if cd_state.delaycount > 80 {
                 add_to_activity_list!(
                     cd_state,
@@ -114,56 +113,41 @@ pub fn init(
             }
         }
         ChargeStateEnum::WaitVehicleChargeStart => {
-            update_car_data(id, &data, &mut car_state);
             if car_state.contactor_open == false && car_state.current_target > 0 {
                 // Current > 0, Contactors closed.
                 cd_state.start_charge = true;
                 cd_state.charge_state = ChargeStateEnum::ChargeLoop;
+                add_to_activity_list!(
+                    cd_state,
+                    "{} - WaitVehicleChargeStart -> ChargeLoop",
+                    elapsed
+                );
             }
             if car_state.charging_enabled == false {
                 cd_state.charge_state = ChargeStateEnum::StopCharge;
                 add_to_activity_list!(
                     cd_state,
-                    "{} - WaitVehicleChargeStart -> StopCharge (Charge Disabled)",
+                    "{} - WtVehChgSt -> StopCharge (Chg Disbld)",
                     elapsed
                 );
             }
             if car_state.malfunction {
                 cd_state.charge_state = ChargeStateEnum::StopCharge;
-                add_to_activity_list!(
-                    cd_state,
-                    "{} - WaitVehicleChargeStart -> StopCharge (Malfunction)",
-                    elapsed
-                );
+                add_to_activity_list!(cd_state, "{} - WtVehChgSt -> StopCharge (Malfunc)", elapsed);
             }
         }
         ChargeStateEnum::ChargeLoop => {
-            if car_state.charging_enabled == false {
+            if car_state.charging_enabled == false && car_state.current_target == 0 {
                 cd_state.charge_state = ChargeStateEnum::StopCharge;
-                add_to_activity_list!(
-                    cd_state,
-                    "{} - ChargeLoop -> StopCharge (Charge Disabled)",
-                    elapsed
-                );
+                add_to_activity_list!(cd_state, "{} - ChgLp -> StopCharge (Chg Disbld)", elapsed);
             }
             if car_state.malfunction {
                 cd_state.charge_state = ChargeStateEnum::StopCharge;
-                add_to_activity_list!(
-                    cd_state,
-                    "{} - ChargeLoop -> StopCharge (Malfunction)",
-                    elapsed
-                );
+                add_to_activity_list!(cd_state, "{} - ChgLp -> StopCharge (Malfnctn)", elapsed);
             }
         }
         ChargeStateEnum::StopCharge => {
-            reset_car_data(&mut car_state);
-            cd_state.switch_one = false;
-            cd_state.switch_two = false;
-            cd_state.latch_enabled = false;
-            cd_state.enable_can_transmit = false;
-            cd_state.current_voltage = 0;
-            cd_state.charge_state = ChargeStateEnum::ChargeIdle;
-            add_to_activity_list!(cd_state, "{} - StopCharge -> ChargeIdle", elapsed);
+            stop_charge(cd_state, car_state, elapsed);
         }
         ChargeStateEnum::TimeOut => {}
     }

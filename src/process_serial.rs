@@ -2,7 +2,9 @@
 use crate::add_to_activity_list;
 use crate::types::CDState;
 use crate::types::*;
-use crate::utils::reset_car_data;
+use crate::utils::stop_charge;
+
+// Logging
 use heapless::consts::U60;
 use heapless::String;
 use ufmt::uwrite;
@@ -14,7 +16,7 @@ pub fn normal_input(
     command: u8,
     elapsed: u32,
     mut cd_state: &mut CDState,
-    mut car_state: &mut CarState,
+    car_state: &mut CarState,
 ) {
     match command {
         // a
@@ -33,13 +35,7 @@ pub fn normal_input(
         0x43 => {
             cd_state.charge_state = ChargeStateEnum::StopCharge;
             add_to_activity_list!(cd_state, "{} - User initied stop of charge.", elapsed);
-            cd_state.charge_state = ChargeStateEnum::ChargeIdle;
-            reset_car_data(&mut car_state);
-            cd_state.switch_one = false;
-            cd_state.latch_enabled = false;
-            cd_state.enable_can_transmit = false;
-            cd_state.current_voltage = 0;
-            add_to_activity_list!(cd_state, "{} - StopCharge -> ChargeIdle", elapsed);
+            stop_charge(cd_state, car_state, elapsed);
         }
         // d
         0x64 => {}
