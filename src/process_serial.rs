@@ -25,7 +25,7 @@ pub fn normal_input(
         0x41 => {}
         // c
         0x63 => {
-            add_to_activity_list!(cd_state, "{} - User initied start of charge.", elapsed);
+            add_to_activity_list!(cd_state, "{} - User initiated start of charge.", elapsed);
             // Turn on Relay to power EV side.
             cd_state.switch_one = true;
             cd_state.charge_state = ChargeStateEnum::WaitForComms;
@@ -34,7 +34,7 @@ pub fn normal_input(
         // C
         0x43 => {
             cd_state.charge_state = ChargeStateEnum::StopCharge;
-            add_to_activity_list!(cd_state, "{} - User initied stop of charge.", elapsed);
+            add_to_activity_list!(cd_state, "{} - User initiated stop of charge.", elapsed);
             stop_charge(cd_state, car_state, elapsed);
         }
         // d
